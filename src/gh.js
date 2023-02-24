@@ -13,6 +13,7 @@ async function getRunner(label) {
     const foundRunners = _.filter(runners, { labels: [{ name: label }] });
     return foundRunners.length > 0 ? foundRunners[0] : null;
   } catch (error) {
+    core.error(`Error retrieving GitHub runners: ${error}`);
     return null;
   }
 }
@@ -26,7 +27,7 @@ async function getRegistrationToken() {
     core.info('GitHub Registration Token is received');
     return response.data.token;
   } catch (error) {
-    core.error('GitHub Registration Token receiving error');
+    core.error(`GitHub Registration Token receiving error: ${error}`);
     throw error;
   }
 }
@@ -44,9 +45,9 @@ async function removeRunner() {
   try {
     await octokit.request('DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}', _.merge(config.githubContext, { runner_id: runner.id }));
     core.info(`GitHub self-hosted runner ${runner.name} is removed`);
-    return;
+    removeRunner();
   } catch (error) {
-    core.error('GitHub self-hosted runner removal error');
+    core.error(`GitHub self-hosted runner removal error ${error}`);
     throw error;
   }
 }

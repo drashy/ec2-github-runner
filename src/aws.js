@@ -11,21 +11,47 @@ function buildUserDataScript(githubRegistrationToken, label) {
       '#!/bin/bash',
       `cd "${config.input.runnerHomeDir}"`,
       'export RUNNER_ALLOW_RUNASROOT=1',
-      `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name $(hostname)-$(uuidgen)`,
-      './run.sh',
+      'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1',
+      `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --unattended`,
+      './run.sh'
     ];
-  } else {
+  } else if (!config.input.numRunners || Number(config.input.numRunners) === 1) {
     return [
       '#!/bin/bash',
       'mkdir actions-runner && cd actions-runner',
-      'case $(uname -m) in aarch64) ARCH="arm64" ;; amd64|x86_64) ARCH="x64" ;; esac && export RUNNER_ARCH=${ARCH}',
-      'curl -O -L https://github.com/actions/runner/releases/download/v2.299.1/actions-runner-linux-${RUNNER_ARCH}-2.299.1.tar.gz',
-      'tar xzf ./actions-runner-linux-${RUNNER_ARCH}-2.299.1.tar.gz',
+
+      "export ARCH=$(uname -m | sed 's/x86_64/x64/g; s/aarch64/arm64/g')",
+      'export RUNNER_VERSION=$(curl --silent "https://api.github.com/repos/actions/runner/releases/latest" | jq -r \'.tag_name[1:]\')',
+      'curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${ARCH}-{$RUNNER_VERSION}.tar.gz',
+      'tar xzf actions-runner-linux-${ARCH}-${RUNNER_VERSION}.tar.gz',
+
       'export RUNNER_ALLOW_RUNASROOT=1',
-      `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name $(hostname)-$(uuidgen)`,
-      './run.sh',
+      'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1',
+      `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name ${label} --unattended`,
+      './run.sh'
     ];
   }
+  const lines = [
+    '#!/bin/bash',
+    'mkdir actions-runner && cd actions-runner',
+
+    "export ARCH=$(uname -m | sed 's/x86_64/x64/g; s/aarch64/arm64/g')",
+    'export RUNNER_VERSION=$(curl --silent "https://api.github.com/repos/actions/runner/releases/latest" | jq -r \'.tag_name[1:]\')',
+    'curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${ARCH}-{$RUNNER_VERSION}.tar.gz',
+
+    'export RUNNER_ALLOW_RUNASROOT=1',
+    'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1',
+  ];
+  for (var i = 1; i <= Number(config.input.numRunners) && i <= 32; i++) {
+    lines.push(`mkdir ${i} && cd ${i}`);
+    lines.push('tar xzf ../actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz');
+    lines.push(`./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name ${label}-${i} --unattended`);
+    lines.push('mkdir _work');
+    lines.push('sudo ./svc.sh install');
+    lines.push('sudo ./svc.sh start');
+    lines.push('cd ..');
+  }
+  return lines;
 }
 
 async function startEc2Instance(label, githubRegistrationToken) {
