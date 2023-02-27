@@ -44,7 +44,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
   ];
   for (var i = 1; i <= Number(config.input.numRunners) && i <= 32; i++) {
     lines.push(`mkdir ${i} && cd ${i}`);
-    lines.push('tar xzf ../actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz');
+    lines.push('tar xzf ../actions-runner-linux-${ARCH}-${RUNNER_VERSION}.tar.gz');
     lines.push(`./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name ${label}-${i} --unattended`);
     lines.push('mkdir _work');
     lines.push('sudo ./svc.sh install');
