@@ -16,6 +16,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
       './run.sh'
     ];
   } else if (!config.input.numRunners || Number(config.input.numRunners) === 1) {
+    core.info("Starting 1 runner..")
     return [
       '#!/bin/bash',
       'mkdir actions-runner && cd actions-runner',
@@ -31,6 +32,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
       './run.sh'
     ];
   }
+  core.info(`Starting ${config.input.numRunners} runners..`)
   const lines = [
     '#!/bin/bash',
     'mkdir actions-runner && cd actions-runner',
