@@ -22,8 +22,8 @@ function buildUserDataScript(githubRegistrationToken, label) {
 
       "export ARCH=$(uname -m | sed 's/x86_64/x64/g; s/aarch64/arm64/g')",
       'export RUNNER_VERSION=$(curl --silent "https://api.github.com/repos/actions/runner/releases/latest" | jq -r \'.tag_name[1:]\')',
-      'curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${ARCH}-{$RUNNER_VERSION}.tar.gz',
-      'tar xzf actions-runner-linux-${ARCH}-${RUNNER_VERSION}.tar.gz',
+      'curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${ARCH}-{$RUNNER_VERSION}.tar.gz',
+      'tar xzf actions-runner.tar.gz',
 
       'export RUNNER_ALLOW_RUNASROOT=1',
       'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1',
@@ -37,18 +37,17 @@ function buildUserDataScript(githubRegistrationToken, label) {
 
     "export ARCH=$(uname -m | sed 's/x86_64/x64/g; s/aarch64/arm64/g')",
     'export RUNNER_VERSION=$(curl --silent "https://api.github.com/repos/actions/runner/releases/latest" | jq -r \'.tag_name[1:]\')',
-    'curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${ARCH}-{$RUNNER_VERSION}.tar.gz',
+    'curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${ARCH}-{$RUNNER_VERSION}.tar.gz',
 
     'export RUNNER_ALLOW_RUNASROOT=1',
     'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1',
   ];
   for (var i = 1; i <= Number(config.input.numRunners) && i <= 32; i++) {
     lines.push(`mkdir ${i} && cd ${i}`);
-    lines.push('tar xzf ../actions-runner-linux-${ARCH}-${RUNNER_VERSION}.tar.gz');
+    lines.push('tar xzf ../actions-runner.tar.gz');
     lines.push(`./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name ${label}-${i} --unattended`);
     lines.push('mkdir _work');
-    lines.push('sudo ./svc.sh install');
-    lines.push('sudo ./svc.sh start');
+    lines.push('sudo ./bin/runsvc.sh');
     lines.push('cd ..');
   }
   return lines;
