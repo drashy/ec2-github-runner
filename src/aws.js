@@ -50,7 +50,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
     lines.push('tar xzf ../actions-runner.tar.gz');
     lines.push(`./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name ${label}-${i} --unattended`);
     lines.push('mkdir _work');
-    lines.push('sudo ./bin/runsvc.sh');
+    lines.push('./svc.sh install && ./svc.sh start');
     lines.push('cd ..');
   }
   return lines;
