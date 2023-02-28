@@ -5,6 +5,7 @@ const config = require('./config');
 // User data scripts are run as the root user
 function buildUserDataScript(githubRegistrationToken, label) {
   if (config.input.runnerHomeDir) {
+    core.info(`Start single runner in ${config.input.runnerHomeDir}..`)
     // If runner home directory is specified, we expect the actions-runner software (and dependencies)
     // to be pre-installed in the AMI, so we simply cd into that directory and then start the runner
     return [
@@ -16,7 +17,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
       './run.sh'
     ];
   } else if (!config.input.numRunners || Number(config.input.numRunners) === 1) {
-    core.info("Starting 1 runner..")
+    core.info("Download and start single runner..")
     return [
       '#!/bin/bash',
       'mkdir actions-runner && cd actions-runner',
@@ -32,7 +33,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
       './run.sh'
     ];
   }
-  core.info(`Starting ${config.input.numRunners} runners..`)
+  core.info(`Download and start ${config.input.numRunners} runners..`)
   const lines = [
     '#!/bin/bash',
     'mkdir actions-runner && cd actions-runner',
