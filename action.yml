@@ -67,8 +67,15 @@ inputs:
     required: false
   num-runners:
     description: >-
-      Number of runners to start.
+      Number of runners to start on each instance
     required: false
+  num-instances:
+    description: >-
+      Number of ec2 instances to spawn (default 1)
+    required: false
+  use-spot-instances:
+    description: >-
+      Use SPOT instances instead of on-demand (save those $$!)
 outputs:
   label:
     description: >-
@@ -78,8 +85,8 @@ outputs:
       - to remove the runner from GitHub when it is not needed anymore.
   ec2-instance-id:
     description: >-
-      EC2 Instance Id of the created runner.
-      The id is used to terminate the EC2 instance when the runner is not needed anymore.
+      EC2 Instance Id(s) of the created runner.
+      The id is used to terminate the EC2 instance(s) when the runner is not needed anymore.
 runs:
   using: node16
   main: ./dist/index.js
