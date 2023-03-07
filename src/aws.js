@@ -116,7 +116,7 @@ async function waitForInstanceRunning(ec2InstanceId) {
   const ec2 = new AWS.EC2();
 
   const params = {
-    InstanceIds: [ec2InstanceId],
+    InstanceIds: ec2InstanceId,
   };
 
   try {
