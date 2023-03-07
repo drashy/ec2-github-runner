@@ -15,6 +15,8 @@ class Config {
       iamRoleName: core.getInput('iam-role-name'),
       runnerHomeDir: core.getInput('runner-home-dir'),
       numRunners: core.getInput('num-runners'),
+      numInstances: core.getInput('num-instances'),
+      useSpotInstances: core.getInput('use-spot-instances'),
     };
 
     const tags = JSON.parse(core.getInput('aws-resource-tags'));
