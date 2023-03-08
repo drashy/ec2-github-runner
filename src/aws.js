@@ -29,7 +29,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
 
       'export RUNNER_ALLOW_RUNASROOT=1',
       'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1',
-      `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name ${label} --unattended`,
+      `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name $(uuidgen)-${label} --unattended`,
       './run.sh'
     ];
   }
@@ -48,7 +48,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
   for (var i = 1; i <= Number(config.input.numRunners) && i <= 32; i++) {
     lines.push(`mkdir ${i} && cd ${i}`);
     lines.push('tar xzf ../actions-runner.tar.gz');
-    lines.push(`./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name ${label}-${i} --unattended`);
+    lines.push(`./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label} --name $(uuidgen)-${label}-${i} --unattended`);
     lines.push('mkdir _work');
     lines.push('./svc.sh install && ./svc.sh start');
     lines.push('cd ..');
@@ -121,10 +121,10 @@ async function waitForInstanceRunning(ec2InstanceId) {
 
   try {
     await ec2.waitFor('instanceRunning', params).promise();
-    core.info(`AWS EC2 instance ${ec2InstanceId} is up and running`);
+    core.info(`AWS EC2 instance(s) ${ec2InstanceId} is up and running`);
     return;
   } catch (error) {
-    core.error(`AWS EC2 instance ${ec2InstanceId} initialization error`);
+    core.error(`AWS EC2 instance(s) ${ec2InstanceId} initialization error`);
     throw error;
   }
 }
