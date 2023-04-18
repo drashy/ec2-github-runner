@@ -18,7 +18,12 @@ inputs:
   ec2-image-id:
     description: >-
       EC2 Image Id (AMI). The new runner will be launched from this image.
-      This input is required if you use the 'start' mode.
+      This input (or ec2-image-ami-name) is required if you use the 'start' mode.
+    required: false
+  ec2-image-ami-name:
+    description: >-
+      EC2 Image Ami Name. The new runner will be launched from an image matching this name.
+      This input (or ec2-image-id) is required if you use the 'start' mode.
     required: false
   ec2-instance-type:
     description: >-

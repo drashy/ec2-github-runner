@@ -59,13 +59,53 @@ function buildUserDataScript(githubRegistrationToken, label) {
   return lines;
 }
 
+async function getImageId(imageNameMatch) {
+  const describeImagesParams = {
+    Owners: ['self'],
+    Filters: [{Name: 'name', Values: [imageNameMatch]}],
+  };
+  
+  const data = await ec2.describeImages(describeImagesParams).promise();
+  const sortedImages = data.Images.sort((a, b) => {
+    return new Date(b.CreationDate) - new Date(a.CreationDate);
+  });
+  if (sortedImages.length > 0) {
+    const latestImageId = sortedImages[0].ImageId;
+    return String(latestImageId);
+  } else {
+    console.log("No matches")
+    return undefined;
+  }
+}
+
 async function startEc2Instance(label, githubRegistrationToken) {
   const ec2 = new EC2();
 
   const userData = buildUserDataScript(githubRegistrationToken, label);
 
+
+  // Check for image ami
+  const imgparams = {
+    Owners: ['self'],
+    Filters: [
+      { Name: 'name', Values: [config.input.ec2ImageAmiName]}
+    ]
+  };
+
+  if (config.input.ec2ImageAmiName) {
+    ec2.describeImages(imgparams, (err, data) => {
+      if (err) {
+        console.log("Error while getting image ids:", err);
+        throw new Error();
+      } else {
+        console.log("Images:", data.Images);
+        config.input.ec2ImageId = data.Images[0].ImageId;
+      }
+    });
+  }
+
   const params = {
-    ImageId: config.input.ec2ImageId,
+    ImageId: config.input.ec2ImageAmiName ? getImageId(config.input.ec2ImageAmiName) : config.input.ec2ImageId,
     InstanceType: config.input.ec2InstanceType,
     MinCount: config.input.numInstances || 1,
     MaxCount: config.input.numInstances || 1,
