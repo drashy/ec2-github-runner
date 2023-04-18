@@ -65,7 +65,7 @@ async function getImageId(imageNameMatch) {
     Filters: [{Name: 'name', Values: [imageNameMatch]}],
   };
   
-  const data = await ec2.describeImages(describeImagesParams).promise();
+  const data = await EC2.describeImages(describeImagesParams).promise();
   const sortedImages = data.Images.sort((a, b) => {
     return new Date(b.CreationDate) - new Date(a.CreationDate);
   });
@@ -79,8 +79,6 @@ async function getImageId(imageNameMatch) {
 }
 
 async function startEc2Instance(label, githubRegistrationToken) {
-  const ec2 = new EC2();
-
   const userData = buildUserDataScript(githubRegistrationToken, label);
 
 
@@ -93,7 +91,7 @@ async function startEc2Instance(label, githubRegistrationToken) {
   };
 
   if (config.input.ec2ImageAmiName) {
-    ec2.describeImages(imgparams, (err, data) => {
+    EC2.describeImages(imgparams, (err, data) => {
       if (err) {
         console.log("Error while getting image ids:", err);
         throw new Error();
@@ -127,7 +125,7 @@ async function startEc2Instance(label, githubRegistrationToken) {
   }
 
   try {
-    const result = await ec2.runInstances(params);
+    const result = await EC2.runInstances(params);
     const ec2InstanceIds = result.Instances.map(x => x.InstanceId); //[0].InstanceId; pass all instances instead of just first id
     
     core.info(`AWS EC2 instance(s) ${ec2InstanceIds} is started`);
@@ -139,14 +137,12 @@ async function startEc2Instance(label, githubRegistrationToken) {
 }
 
 async function terminateEc2Instance() {
-  const ec2 = new EC2();
-
   const params = {
     InstanceIds: JSON.parse(config.input.ec2InstanceId),
   };
 
   try {
-    await ec2.terminateInstances(params);
+    await EC2.terminateInstances(params);
     core.info(`AWS EC2 instance ${config.input.ec2InstanceId} is terminated`);
     return;
   } catch (error) {
@@ -156,15 +152,13 @@ async function terminateEc2Instance() {
 }
 
 async function waitForInstanceRunning(ec2InstanceId) {
-  const ec2 = new EC2();
-
   const params = {
     InstanceIds: ec2InstanceId,
   };
 
   try {
     await waitUntilInstanceRunning({
-      client: ec2,
+      client: EC2,
       maxWaitTime: 200
     }, params);
     core.info(`AWS EC2 instance(s) ${ec2InstanceId} is up and running`);
