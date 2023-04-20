@@ -1,5 +1,5 @@
 const {
-  EC2,
+  EC2Client,
   RunInstancesCommand,
   waitUntilInstanceRunning,
   DescribeImagesCommand
@@ -62,13 +62,15 @@ function buildUserDataScript(githubRegistrationToken, label) {
 }
 
 async function getImageId(imageNameMatch) {
+  const ec2 = new EC2Client();
+
   const describeImagesParams = {
     Owners: ['self'],
     Filters: [{Name: 'name', Values: [imageNameMatch]}],
   };
   
   const command = new DescribeImagesCommand(describeImagesParams);
-  const data = await EC2.send(command);
+  const data = await ec2.send(command);
   const sortedImages = data.Images.sort((a, b) => {
     return new Date(b.CreationDate) - new Date(a.CreationDate);
   });
@@ -107,8 +109,9 @@ async function startEc2Instance(label, githubRegistrationToken) {
   }
 
   try {
+    const ec2 = new EC2Client();
     const runInstancesCommand = new RunInstancesCommand(params);
-    EC2.send(runInstancesCommand, (err, data) => {
+    ec2.send(runInstancesCommand, (err, data) => {
       if (err) {
         console.log(err, err.stack);
       } else {
