@@ -1,7 +1,8 @@
 const {
   EC2,
   RunInstancesCommand,
-  waitUntilInstanceRunning
+  waitUntilInstanceRunning,
+  DescribeImagesCommand
 } = require("@aws-sdk/client-ec2");
 const core = require('@actions/core');
 const config = require('./config');
@@ -66,7 +67,8 @@ async function getImageId(imageNameMatch) {
     Filters: [{Name: 'name', Values: [imageNameMatch]}],
   };
   
-  const data = await EC2.describeImages(describeImagesParams).promise();
+  const command = new DescribeImagesCommand(describeImagesParams);
+  const data = await EC2.send(command);
   const sortedImages = data.Images.sort((a, b) => {
     return new Date(b.CreationDate) - new Date(a.CreationDate);
   });
