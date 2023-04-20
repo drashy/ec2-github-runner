@@ -1,5 +1,7 @@
 const {
   EC2,
+  RunInstancesCommand,
+  send,
   waitUntilInstanceRunning
 } = require("@aws-sdk/client-ec2");
 const core = require('@actions/core');
@@ -125,11 +127,16 @@ async function startEc2Instance(label, githubRegistrationToken) {
   }
 
   try {
-    const result = await EC2.runInstances(params);
-    const ec2InstanceIds = result.Instances.map(x => x.InstanceId); //[0].InstanceId; pass all instances instead of just first id
-    
-    core.info(`AWS EC2 instance(s) ${ec2InstanceIds} is started`);
-    return ec2InstanceIds;
+    const runInstancesCommand = new RunInstancesCommand(params);
+    EC2.send(runInstancesCommand, (err, data) => {
+      if (err) {
+        console.log(err, err.stack);
+      } else {
+        const ec2InstanceIds = data.Instances.map(x => x.InstanceId); //[0].InstanceId; pass all instances instead of just first id
+        core.info(`AWS EC2 instance(s) ${ec2InstanceIds} is started`);
+        return ec2InstanceIds;
+      }
+    });
   } catch (error) {
     core.error('AWS EC2 instance starting error');
     throw error;
