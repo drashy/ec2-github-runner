@@ -1,6 +1,7 @@
 const {
   EC2Client,
   RunInstancesCommand,
+  TerminateInstancesCommand,
   waitUntilInstanceRunning,
   DescribeImagesCommand
 } = require("@aws-sdk/client-ec2");
@@ -127,28 +128,33 @@ async function startEc2Instance(label, githubRegistrationToken) {
 }
 
 async function terminateEc2Instance() {
+  const ec2 = new EC2Client();
+
   const params = {
     InstanceIds: JSON.parse(config.input.ec2InstanceId),
   };
 
-  try {
-    await EC2.terminateInstances(params);
-    core.info(`AWS EC2 instance ${config.input.ec2InstanceId} is terminated`);
-    return;
-  } catch (error) {
-    core.error(`AWS EC2 instance ${config.input.ec2InstanceId} termination error`);
-    throw error;
-  }
+  const command = new TerminateInstancesCommand(params);
+  ec2.send(command, (err, data) => {
+    if (err) {
+      core.error(`AWS EC2 instance ${data.InstanceIds} termination error: ${err}`);
+      throw err;
+    } else {
+      core.info(`AWS EC2 instance ${data.InstanceIds} is terminated`);
+      return;
+    }
+  });
 }
 
 async function waitForInstanceRunning(ec2InstanceId) {
+  const ec2 = new EC2Client();
   const params = {
     InstanceIds: ec2InstanceId,
   };
 
   try {
     await waitUntilInstanceRunning({
-      client: EC2,
+      client: ec2,
       maxWaitTime: 200
     }, params);
     core.info(`AWS EC2 instance(s) ${ec2InstanceId} is up and running`);
