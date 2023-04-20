@@ -84,27 +84,6 @@ async function getImageId(imageNameMatch) {
 async function startEc2Instance(label, githubRegistrationToken) {
   const userData = buildUserDataScript(githubRegistrationToken, label);
 
-
-  // Check for image ami
-  const imgparams = {
-    Owners: ['self'],
-    Filters: [
-      { Name: 'name', Values: [config.input.ec2ImageAmiName]}
-    ]
-  };
-
-  if (config.input.ec2ImageAmiName) {
-    EC2.describeImages(imgparams, (err, data) => {
-      if (err) {
-        console.log("Error while getting image ids:", err);
-        throw new Error();
-      } else {
-        console.log("Images:", data.Images);
-        config.input.ec2ImageId = data.Images[0].ImageId;
-      }
-    });
-  }
-
   const params = {
     ImageId: config.input.ec2ImageAmiName ? getImageId(config.input.ec2ImageAmiName) : config.input.ec2ImageId,
     InstanceType: config.input.ec2InstanceType,
