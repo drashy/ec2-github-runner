@@ -88,7 +88,7 @@ async function startEc2Instance(label, githubRegistrationToken) {
   const userData = buildUserDataScript(githubRegistrationToken, label);
 
   const params = {
-    ImageId: config.input.ec2ImageAmiName ? getImageId(config.input.ec2ImageAmiName) : config.input.ec2ImageId,
+    ImageId: config.input.ec2ImageAmiName ? await getImageId(config.input.ec2ImageAmiName) : config.input.ec2ImageId,
     InstanceType: config.input.ec2InstanceType,
     MinCount: config.input.numInstances || 1,
     MaxCount: config.input.numInstances || 1,
