@@ -80,7 +80,7 @@ async function getImageId(imageNameMatch) {
     return String(latestImageId);
   } else {
     console.log("No matches")
-    return undefined;
+    throw `no matches for ${imageNameMatch}`;
   }
 }
 
@@ -153,12 +153,9 @@ async function waitForInstanceRunning(ec2InstanceId) {
   };
 
   try {
-    await waitUntilInstanceRunning({
-      client: ec2,
-      maxWaitTime: 200
-    }, params);
+    await ec2.waitUntilInstanceRunning(params);
     core.info(`AWS EC2 instance(s) ${ec2InstanceId} is up and running`);
-    return;
+    return ec2InstanceId;
   } catch (error) {
     core.error(`AWS EC2 instance(s) ${ec2InstanceId} initialization error`);
     throw error;
