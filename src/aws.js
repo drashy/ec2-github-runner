@@ -2,6 +2,7 @@ const {
   EC2Client,
   RunInstancesCommand,
   TerminateInstancesCommand,
+  waitUntilInstanceRunning,
   DescribeImagesCommand
 } = require("@aws-sdk/client-ec2");
 const core = require('@actions/core');
@@ -152,7 +153,7 @@ async function waitForInstanceRunning(ec2InstanceId) {
   };
 
   try {
-    await ec2.waitUntilInstanceRunning(params);
+    await waitUntilInstanceRunning(params);
     core.info(`AWS EC2 instance(s) ${ec2InstanceId} is up and running`);
     return ec2InstanceId;
   } catch (error) {
