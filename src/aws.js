@@ -148,17 +148,16 @@ async function terminateEc2Instance() {
 
 async function waitForInstanceRunning(ec2InstanceId) {
   const ec2 = new EC2Client();
-  const params = {
-    InstanceIds: ec2InstanceId,
-    client: ec2
-  };
 
   try {
-    await waitUntilInstanceRunning(params);
+    await waitUntilInstanceRunning({
+      client: ec2,
+      maxWaitTime: 120
+    }, {InstanceIds: ec2InstanceId});
     core.info(`AWS EC2 instance(s) ${ec2InstanceId} is up and running`);
     return ec2InstanceId;
   } catch (error) {
-    core.error(`AWS EC2 instance(s) ${ec2InstanceId} initialization error`);
+    core.error(`AWS EC2 instance(s) ${ec2InstanceId} initialization error: ${error}`);
     throw error;
   }
 }
