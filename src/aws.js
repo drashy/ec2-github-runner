@@ -63,7 +63,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
 }
 
 async function getImageId(imageNameMatch) {
-  const ec2 = new EC2Client();
+  const ec2 = new EC2Client({region: process.env.AWS_REGION});
 
   const describeImagesParams = {
     Owners: ['self'],
@@ -110,7 +110,7 @@ async function startEc2Instance(label, githubRegistrationToken) {
   }
 
   try {
-    const ec2 = new EC2Client();
+    const ec2 = new EC2Client({region: process.env.AWS_REGION});
     const runInstancesCommand = new RunInstancesCommand(params);
     ec2.send(runInstancesCommand, (err, data) => {
       if (err) {
@@ -128,7 +128,7 @@ async function startEc2Instance(label, githubRegistrationToken) {
 }
 
 async function terminateEc2Instance() {
-  const ec2 = new EC2Client();
+  const ec2 = new EC2Client({region: process.env.AWS_REGION});
 
   const params = {
     InstanceIds: JSON.parse(config.input.ec2InstanceId),
@@ -149,7 +149,7 @@ async function terminateEc2Instance() {
 async function waitForInstanceRunning(ec2InstanceId) {
   core.info(`waitForInstanceRunning: ${ec2InstanceId}`)
   core.info(`region: ${process.env.AWS_REGION}`)
-  const ec2 = new EC2Client();
+  const ec2 = new EC2Client({region: process.env.AWS_REGION});
 
   try {
     await waitUntilInstanceRunning({
