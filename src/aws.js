@@ -109,22 +109,21 @@ async function startEc2Instance(label, githubRegistrationToken) {
     }
   }
 
-  try {
-    const ec2 = new EC2Client({region: process.env.AWS_REGION});
-    const runInstancesCommand = new RunInstancesCommand(params);
-    ec2.send(runInstancesCommand, (err, data) => {
-      if (err) {
-        console.log(err, err.stack);
-      } else {
-        const ec2InstanceIds = data.Instances.map(x => x.InstanceId); //[0].InstanceId; pass all instances instead of just first id
-        core.info(`AWS EC2 instance(s) ${ec2InstanceIds} is started`);
-        return ec2InstanceIds;
-      }
-    });
-  } catch (error) {
-    core.error('AWS EC2 instance starting error');
-    throw error;
-  }
+  const ec2 = new EC2Client({region: process.env.AWS_REGION});
+
+  const runInstancesCommand = new RunInstancesCommand(params);
+
+  ec2.send(runInstancesCommand, (err, data) => {
+    if (err) {
+      console.log(err, err.stack);
+      core.error(`AWS EC2 instance failed to start - error: ${err}`)
+      throw err;
+    } else {
+      const ec2InstanceIds = data.Instances.map(x => x.InstanceId); //[0].InstanceId; pass all instances instead of just first id
+      core.info(`AWS EC2 instance(s) ${ec2InstanceIds} is started`);
+      return ec2InstanceIds;
+    }
+  });
 }
 
 async function terminateEc2Instance() {
@@ -148,7 +147,6 @@ async function terminateEc2Instance() {
 
 async function waitForInstanceRunning(ec2InstanceId) {
   core.info(`waitForInstanceRunning: ${ec2InstanceId}`)
-  core.info(`region: ${process.env.AWS_REGION}`)
   const ec2 = new EC2Client({region: process.env.AWS_REGION});
 
   try {
