@@ -2,7 +2,6 @@ const {
   EC2Client,
   RunInstancesCommand,
   TerminateInstancesCommand,
-  waitUntilInstanceRunning,
   DescribeImagesCommand
 } = require("@aws-sdk/client-ec2");
 const core = require('@actions/core');
