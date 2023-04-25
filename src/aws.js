@@ -150,6 +150,7 @@ async function waitForInstanceRunning(ec2InstanceId) {
   const ec2 = new EC2Client();
   const params = {
     InstanceIds: ec2InstanceId,
+    client: ec2
   };
 
   try {
