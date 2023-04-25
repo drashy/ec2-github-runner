@@ -147,6 +147,8 @@ async function terminateEc2Instance() {
 }
 
 async function waitForInstanceRunning(ec2InstanceId) {
+  core.info(`waitForInstanceRunning: ${ec2InstanceId}`)
+  core.info(`region: ${process.env.AWS_REGION}`)
   const ec2 = new EC2Client();
 
   try {
