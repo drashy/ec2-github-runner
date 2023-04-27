@@ -4,7 +4,7 @@ const config = require('./config');
 const core = require('@actions/core');
 
 function setOutput(label, ec2InstanceId) {
-  core.debug(`Setting outputs: label=${label} ec2-instance-id=${ec2InstanceId}`)
+  core.info(`Setting outputs: label=${label} ec2-instance-id=${ec2InstanceId}`)
   core.setOutput('label', label);
   core.setOutput('ec2-instance-id', ec2InstanceId);
 }
