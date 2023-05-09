@@ -113,7 +113,8 @@ async function startEc2Instance(label, githubRegistrationToken) {
 
   const runInstancesCommand = new RunInstancesCommand(params);
 
-  ec2.send(runInstancesCommand, (err, data) => {
+  console.log("beforesend")
+  await ec2.send(runInstancesCommand, (err, data) => {
     if (err) {
       console.log(err, err.stack);
       core.error(`AWS EC2 instance failed to start - error: ${err}`)
@@ -124,6 +125,7 @@ async function startEc2Instance(label, githubRegistrationToken) {
       return ec2InstanceIds;
     }
   });
+  console.log("aftersend")
 }
 
 async function terminateEc2Instance() {
