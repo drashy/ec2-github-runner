@@ -84,14 +84,16 @@ async function getImageId(imageNameMatch) {
   }
 }
 
-async function sendstart(command) {
-  const ec2 = new EC2Client({region: process.env.AWS_REGION});
+// async function sendstart(command) {
+//   const ec2 = new EC2Client({region: process.env.AWS_REGION});
 
-  console.log("sendstart")
-  const response = await ec2.send(command); //, (err, data) => {
-  console.log("response")
-  console.log(response)
-  console.log("endresponse")
+//   console.log("sendstart")
+//   const response = await ec2.send(command); //, (err, data) => {
+//   console.log("response")
+//   console.log(response)
+//   console.log("endresponse")
+//   console.log(response.Instances.map(x => x.InstanceId));
+//   return response.Instances.map(x => x.InstanceId);
   //   if (err) {
   //     console.log(err, err.stack);
   //     core.error(`Error: ${err}`)
@@ -102,7 +104,7 @@ async function sendstart(command) {
   //     return ec2InstanceIds;
   //   }
   // });
-}
+//}
 
 async function startEc2Instance(label, githubRegistrationToken) {
   const userData = buildUserDataScript(githubRegistrationToken, label);
@@ -129,13 +131,20 @@ async function startEc2Instance(label, githubRegistrationToken) {
     }
   }
 
-  //const ec2 = new EC2Client({region: process.env.AWS_REGION});
+  const ec2 = new EC2Client({region: process.env.AWS_REGION});
 
-  const runInstancesCommand = new RunInstancesCommand(params);
+  const command = new RunInstancesCommand(params);
 
-  //console.log("beforesend")
-  const instanceIds = await sendstart(runInstancesCommand)
-  return instanceIds
+  console.log("sendstart")
+  const response = await ec2.send(command); //, (err, data) => {
+  console.log("response")
+  console.log(response)
+  console.log("endresponse")
+  console.log(response.Instances.map(x => x.InstanceId));
+  return response.Instances.map(x => x.InstanceId);
+
+  // const instanceIds = await sendstart(runInstancesCommand)
+  // return instanceIds
   // await ec2.send(runInstancesCommand, (err, data) => {
   //   if (err) {
   //     console.log(err, err.stack);
