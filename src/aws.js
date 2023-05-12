@@ -84,6 +84,22 @@ async function getImageId(imageNameMatch) {
   }
 }
 
+async function sendstart(command) {
+  const ec2 = new EC2Client({region: process.env.AWS_REGION});
+
+  ec2.send(command, (err, data) => {
+    if (err) {
+      console.log(err, err.stack);
+      core.error(`Error: ${err}`)
+      throw err;
+    } else {
+      const ec2InstanceIds = data.Instances.map(x => x.InstanceId); //[0].InstanceId; pass all instances instead of just first id
+      core.info(`AWS EC2 instance(s) ${ec2InstanceIds} is started`);
+      return ec2InstanceIds;
+    }
+  });
+}
+
 async function startEc2Instance(label, githubRegistrationToken) {
   const userData = buildUserDataScript(githubRegistrationToken, label);
 
@@ -109,23 +125,25 @@ async function startEc2Instance(label, githubRegistrationToken) {
     }
   }
 
-  const ec2 = new EC2Client({region: process.env.AWS_REGION});
+  //const ec2 = new EC2Client({region: process.env.AWS_REGION});
 
   const runInstancesCommand = new RunInstancesCommand(params);
 
-  console.log("beforesend")
-  await ec2.send(runInstancesCommand, (err, data) => {
-    if (err) {
-      console.log(err, err.stack);
-      core.error(`AWS EC2 instance failed to start - error: ${err}`)
-      throw err;
-    } else {
-      const ec2InstanceIds = data.Instances.map(x => x.InstanceId); //[0].InstanceId; pass all instances instead of just first id
-      core.info(`AWS EC2 instance(s) ${ec2InstanceIds} is started`);
-      return ec2InstanceIds;
-    }
-  });
-  console.log("aftersend")
+  //console.log("beforesend")
+  const instanceIds = await sendstart(runInstancesCommand)
+  return instanceIds
+  // await ec2.send(runInstancesCommand, (err, data) => {
+  //   if (err) {
+  //     console.log(err, err.stack);
+  //     core.error(`AWS EC2 instance failed to start - error: ${err}`)
+  //     throw err;
+  //   } else {
+  //     const ec2InstanceIds = data.Instances.map(x => x.InstanceId); //[0].InstanceId; pass all instances instead of just first id
+  //     core.info(`AWS EC2 instance(s) ${ec2InstanceIds} is started`);
+  //     return ec2InstanceIds;
+  //   }
+  // });
+  // console.log("aftersend")
 }
 
 async function terminateEc2Instance() {
