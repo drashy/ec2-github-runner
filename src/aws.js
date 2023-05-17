@@ -131,32 +131,20 @@ async function startEc2Instance(label, githubRegistrationToken) {
     }
   }
 
+  // add root storage size if its been set
+  if (config.input.rootStorageGB) {
+    params["BlockDeviceMappings"] = [
+      {
+        DeviceName: "/dev/sda1",
+        "Ebs": { "VolumeSize": config.input.rootStorageGB }
+      }
+    ]
+  }
+
   const ec2 = new EC2Client({region: process.env.AWS_REGION});
-
   const command = new RunInstancesCommand(params);
-
-  console.log("sendstart")
-  const response = await ec2.send(command); //, (err, data) => {
-  console.log("response")
-  console.log(response)
-  console.log("endresponse")
-  console.log(response.Instances.map(x => x.InstanceId));
+  const response = await ec2.send(command);
   return response.Instances.map(x => x.InstanceId);
-
-  // const instanceIds = await sendstart(runInstancesCommand)
-  // return instanceIds
-  // await ec2.send(runInstancesCommand, (err, data) => {
-  //   if (err) {
-  //     console.log(err, err.stack);
-  //     core.error(`AWS EC2 instance failed to start - error: ${err}`)
-  //     throw err;
-  //   } else {
-  //     const ec2InstanceIds = data.Instances.map(x => x.InstanceId); //[0].InstanceId; pass all instances instead of just first id
-  //     core.info(`AWS EC2 instance(s) ${ec2InstanceIds} is started`);
-  //     return ec2InstanceIds;
-  //   }
-  // });
-  // console.log("aftersend")
 }
 
 async function terminateEc2Instance() {

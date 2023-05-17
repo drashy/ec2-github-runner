@@ -18,6 +18,7 @@ class Config {
       numRunners: core.getInput('num-runners'),
       numInstances: core.getInput('num-instances'),
       useSpotInstances: core.getInput('use-spot-instances'),
+      rootStorageGB: core.getInput('root-storage-gb'),
     };
 
     const tags = JSON.parse(core.getInput('aws-resource-tags'));
