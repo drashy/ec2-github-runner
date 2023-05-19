@@ -81,6 +81,9 @@ inputs:
   use-spot-instances:
     description: >-
       Use SPOT instances instead of on-demand (save those $$!)
+  root-storage-gb:
+    description: >-
+      Size in GB of the root storage device
 outputs:
   label:
     description: >-
